@@ -15,6 +15,8 @@ using std::endl;
 class ICar
 {
 public:
+	virtual ~ICar() {	}
+
 	virtual void car() = 0;
 };
 
@@ -41,6 +43,8 @@ public:
 class IDriver
 {
 public:
+	virtual ~IDriver() { }
+
 	virtual void driver(ICar *) = 0;
 };
 
@@ -63,6 +67,10 @@ int main(void)
 
 	dingfang->driver(benz);
 	dingfang->driver(bmw);
+
+	delete dingfang;
+	delete benz;
+	delete bmw;
 
 	return 0;
 }

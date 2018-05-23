@@ -65,5 +65,12 @@ int main(void)
 	//老师下达明林 , 让体育委员清点人数
 	teacher->command(new GroupLeader(st));
 
+	int len = st.size();
+	for (int i = 0; i < len; ++i)
+	{
+		delete st.back();
+		st.pop_back();
+	}
+
 	return 0;
 }

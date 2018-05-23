@@ -11,6 +11,8 @@ using namespace std;
 class Father
 {
 public:
+	virtual ~Father() {	}
+
 	virtual void print()
 	{
 		cout << "Father is runing..." << endl;
@@ -46,6 +48,9 @@ int main(void)
 	Son *s = new Son();
 	s->print();
 	print(s);
+
+	delete f;
+	delete s;
 
 	return 0;
 }

@@ -57,6 +57,9 @@ public:
 		//而不是通过Install的install方法来调用Wizard的 安装应用三步方法, ..为了让Install知道更少的方法, 降低耦合
 		//在以后修改的时候更加的安全和方便
 		wizard->install();
+
+		delete wizard;
+
 		return 0;
 	}
 };
@@ -65,6 +68,8 @@ int main(void)
 {
 	Install *install = new Install();
 	install->install(new Wizard());
+
+	delete install;
 
 	return 0;
 }

@@ -91,5 +91,10 @@ int main(void)
 	print(k1);
 	print(k);
 
+	delete k;
+	delete k1;
+	delete f;
+	delete s;
+
 	return 0;
 }
