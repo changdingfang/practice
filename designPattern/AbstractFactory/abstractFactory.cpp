@@ -168,6 +168,8 @@ public:
 
 int main(void)
 {
+	//外界不与具体实现类有关联,
+
 	//女人制造工厂
 	HumanFactory *maleFactory = new MaleFactory();
 	//男人制造工厂
@@ -188,6 +190,12 @@ int main(void)
 	//############################
 	//白种人和黄种人制造黑种人的过程是一模一样的, 只是换了调用的方法
 	//############################
+	
+	delete maleFactory;
+	delete femalefactory;
+	
+	delete maleBlack;
+	delete femaleBlack;
 
 	return 0;
 }
