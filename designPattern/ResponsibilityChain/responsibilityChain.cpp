@@ -90,10 +90,8 @@ public:
 
 	virtual void response(IWomen *) = 0;
 
-protected:
 private:
 	Handler *nextHandler_;
-
 	int level_;
 }; 
 
