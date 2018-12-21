@@ -23,9 +23,6 @@ class Emperor;
 //皇帝的最大数量 
 const int MaxEmperorNum = 4;
 
-//存放每一个皇帝实例
-vector<Emperor *> emperorVec;
-
 class Emperor
 {
 public:
@@ -71,8 +68,12 @@ private:
 private:
 	string name_;
 	static pthread_once_t once_;
+	//存放每一个皇帝实例
+	static vector<Emperor *> emperorVec;
+
 };
 
+vector<Emperor *> Emperor::emperorVec;
 pthread_once_t Emperor::once_ = PTHREAD_ONCE_INIT;
 
 int main(void)
