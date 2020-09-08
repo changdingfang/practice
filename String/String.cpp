@@ -112,6 +112,28 @@ namespace df
     }
 
 
+    void String::StringValue::erase(String::sizeType index, String::sizeType count)
+    {
+        if (index > this->size())
+        {
+            throw("out of range");
+        }
+
+        if (index + count > this->size() || count > this->size())
+        {
+            count = this->size() - index;
+        }
+
+        sizeType i = index;
+        for (; i + count < this->size(); ++i)
+        {
+            data_[i] = data_[i + count];
+        }
+        data_[i] = 0;
+        size_ = i;
+    }
+
+
     void String::StringValue::append(const char *data)
     {
         sizeType size = ::strlen(data) + this->size();
@@ -212,6 +234,21 @@ namespace df
     }
 
 
+    const char &String::operator [] (int index) const
+    {
+        /* 悲观认为只要是该操作符就认为会修改,不再共享 */
+        if (pValue_->refCount() > 1)
+        {
+            pValue_->minusRefCount();
+            StringValue **p = const_cast<StringValue **>(&pValue_);
+            *p = new StringValue(pValue_->data());
+        }
+        pValue_->markUnshareable();
+
+        return pValue_->data()[index];
+    }
+
+
     char &String::front()
     {
         this->refCountCheck_();
@@ -268,6 +305,31 @@ namespace df
     }
 
 
+    String &String::erase(sizeType index, sizeType count)
+    {
+        this->refCountCheck_();
+        pValue_->erase(index, count);
+
+        return *this;
+    }
+
+
+    void String::push_back(const char &c)
+    {
+        this->append(c);
+    }
+
+
+    void String::pop_back()
+    {
+        if (this->size() == 0)
+        {
+            return ;
+        }
+        this->erase(this->size() - 1, 1);
+    }
+
+
     String &String::append(const String &r)
     {
         return this->append(r.data());
@@ -309,32 +371,38 @@ namespace df
 
     int String::compare(const String &r) const
     {
-        return this->compare(r.data());
+        return this->compare(0, this->size(), r.data(), 0, r.size());
     }
 
 
     int String::compare(sizeType pos, sizeType count, const String &r) const
     {
-        if (pos > this->size())
-        {
-            throw("pos > size");
-        }
-
-        if (pos + count > this->size())
-        {
-            count = this->size() - pos;
-        }
-
-        const sizeType size = min(count, r.size());
-        int res = compare(this->data() + pos, r.data(), size);
-
-        return res ? res : !(this->size() == r.size());
+        return this->compare(pos, count, r.data(), 0, r.size());
     }
 
 
     int String::compare(sizeType pos1, sizeType count1, const String &r, sizeType pos2, sizeType count2) const
     {
-        if (pos1 > this->size() || pos2 > r.size())
+        return this->compare(pos1, count1, r.data(), pos2, count2);
+    }
+
+
+    int String::compare(const char *data) const
+    {
+        return this->compare(0, this->size(), data, 0, ::strlen(data));
+    }
+
+
+    int String::compare(sizeType pos, sizeType count, const char *data) const
+    {
+        return this->compare(pos, count, data, 0, ::strlen(data));
+    }
+
+
+    int String::compare(sizeType pos1, sizeType count1, const char *data, sizeType pos2, sizeType count2) const
+    {
+        sizeType dataSize = ::strlen(data);
+        if (pos1 > this->size() || pos2 > dataSize)
         {
             throw("pos > size");
         }
@@ -344,36 +412,51 @@ namespace df
             count1 = this->size() - pos1;
         }
 
-        if (pos2 + count2 > r.size())
+        if (pos2 + count2 > dataSize)
         {
-            count2 = r.size() - pos2;
+            count2 = dataSize - pos2;
         }
 
         const sizeType size = min(count1, count2);
-        int res = compare(this->data() + pos1, r.data() + pos2, size);
+        int res = compare(this->data() + pos1, data + pos2, size);
 
-        return res ? res : !(this->size() == r.size());
+        return res ? res : !(count1 == count2);
     }
 
 
-    int String::compare(const char *data) const
+    void String::swap(String &r) noexcept
     {
-        const sizeType size = min(this->size(), sizeType(::strlen(data)));
-        int res = compare(this->data(), data, size);
-
-        return res ? res : !(this->size() == ::strlen(data));
+        if (pValue_ == r.pValue_)
+        {
+            return ;
+        }
+        StringValue *p = pValue_;
+        pValue_ = r.pValue_;
+        r.pValue_ = p;
     }
 
 
     bool operator == (const String &l, const String &r)
     {
-        return !::strcmp(l.data(), r.data());
+        return !l.compare(r);
+    }
+
+
+    bool operator == (const String &l, const char *data)
+    {
+        return !l.compare(data);
+    }
+
+
+    bool operator == (const char *data, const String &r)
+    {
+        return !r.compare(data);
     }
 
 
     std::ostream &operator << (std::ostream &s, const String &r)
     {
-        return r.size() == 0 ? s : s << r.pValue_->data();
+        return r.size() == 0 ? s : s << r.data();
     }
 
 
@@ -383,7 +466,7 @@ namespace df
     }
 
 
-    int min(String::sizeType num1, String::sizeType num2)
+    inline int min(String::sizeType num1, String::sizeType num2)
     {
         return num1 > num2 ? num2 : num1;
     }

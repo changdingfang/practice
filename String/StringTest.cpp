@@ -176,7 +176,7 @@ void testAt()
 
 void check(const String &s, String::sizeType size, String::sizeType capacity)
 {
-#if 1
+#if 0
     cout << "length: " << s.length() << endl;
     cout << "__size: " << s.size() << endl;
     cout << "capacity: " << s.capacity() << endl;
@@ -294,11 +294,83 @@ void testCompare()
     String s1("hello");
     String s2("hello world");
 
-    cout << s1.compare(s2) << endl;
-    cout << s2.compare(s1) << endl;
+    assert(s1.compare(s2));
+    assert(s2.compare(s1));
+    assert(s1.compare("hello world"));
+    assert(!s2.compare("hello world"));
 
-    cout << s1.compare("hello ") << endl;
-    cout << s2.compare("hello ") << endl;
+    String s3("llo ");
+    assert(s1.compare(2, 4, s3));
+    assert(!s2.compare(2, 4, s3));
+
+    assert(!s1.compare(1, 1, "e"));
+    assert(!s2.compare(4, 1, "o"));
+
+    assert(!s1.compare(0, s1.size(), "xzbhellof", 3, 5));
+    assert(!s2.compare(6, 5, "fjworld", 2, 5));
+
+    assert(!(s2 == s1));
+    assert((s2 == "hello world"));
+    assert(!(s1 == "hello world"));
+    assert(("hello world" == s2));
+
+    cout << "compare test success" << endl;
+}
+
+
+void testErase()
+{
+    String s1("hello world");
+
+    s1.pop_back();
+    assert(s1 == "hello worl");
+    s1.pop_back();
+    assert(s1 == "hello wor");
+    s1.pop_back();
+    assert(s1 == "hello wo");
+
+    String s2("0123456789"), s3, s4, s5, s6;
+    s6 = s5 = s4 = s3 = s1 = s2;
+    s2.erase();
+    assert(s2 == "");
+
+    s1.erase(5);
+    assert(s1 == "01234");
+    s3.erase(4, 100);
+    assert(s3 == "0123");
+
+    s4.erase(4, 6);
+    assert(s4 == "0123");
+
+    s5.erase(4, 2);
+    assert(s5 == "01236789");
+
+    s6.erase(0, 3);
+    assert(s6 == "3456789");
+
+    try
+    {
+        s5.erase(s5.size() + 1);
+        assert(false);
+    }
+    catch(...) { }
+
+    cout << "erase test success" << endl;
+}
+
+
+void testSwap()
+{
+    String s1("hello world"), s2("ding fang"), s3;
+
+    s1.swap(s2);
+    assert(s1 == "ding fang");
+    assert(s2 == "hello world");
+    s1.swap(s3);
+    assert(s1 == "");
+    assert(s3 == "ding fang");
+
+    cout << "swap test success" << endl;
 }
 
 
@@ -312,6 +384,10 @@ void testBug()
     s1[0] = 'x';
     cout << s1.data() << endl;
     cout << p << endl;
+
+    // const String s3("hello world");
+    // cout << "s3: " << s3 << endl;
+    // cout << "s3[2]: " << s3[2] << endl;
 }
 
 
@@ -326,9 +402,11 @@ int main(void)
     testReserve();
     testClear();
     testAppend();
-#endif
-
     testCompare();
+    testErase();
+#endif
+    testSwap();
+
 
     // testBug();
 
