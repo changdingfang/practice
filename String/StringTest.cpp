@@ -282,8 +282,8 @@ void testAppend()
     s1.append(s2);
     assert(!strcmp(s1.c_str(), "hello ding fang"));
 
-    s1.append('m');
-    assert(!strcmp(s1.c_str(), "hello ding fangm"));
+    s1.append(10, 'm');
+    assert(!strcmp(s1.c_str(), "hello ding fangmmmmmmmmmm"));
 
     cout << "append test success" << endl;
 }
@@ -374,6 +374,104 @@ void testSwap()
 }
 
 
+void testResize()
+{
+    String s1("hello world");
+    s1.resize(22, 'x');
+    check(s1, 22, 30);
+
+    s1.resize(20, 'x');
+    check(s1, 20, 30);
+
+    s1.resize(8, 'x');
+    check(s1, 8, 30);
+
+    s1.resize(20);
+    check(s1, 20, 30);
+
+    s1.resize(33, 'm');
+    check(s1, 33, 60);
+
+    s1.resize(45);
+    check(s1, 45, 60);
+
+    s1.resize(133);
+    check(s1, 133, 133);
+
+    try
+    {
+        s1.resize(s1.max_size() + 1);
+        assert(false);
+    }
+    catch(...) { }
+
+    cout << "resize test success" << endl;
+}
+
+
+void testCopy()
+{
+    String s1("hello world");
+    char *p = new char [50];
+
+    ::memset(p, 0x00, 50);
+    assert(s1.copy(p, 5) == 5);
+    assert(!strcmp(p, "hello"));
+
+    ::memset(p, 0x00, 50);
+    assert(s1.copy(p, 5, 5) == 5);
+    assert(!strcmp(p, " worl"));
+
+    ::memset(p, 0x00, 50);
+    try
+    {
+        s1.copy(p, 5, 50);
+        assert(false);
+    }
+    catch(...) { }
+
+    ::memset(p, 0x00, 50);
+    assert(s1.copy(p, 50, 5) == 6);
+    assert(!strcmp(p, " world"));
+
+    ::memset(p, 0x00, 50);
+    assert(s1.copy(p, 50, 0) == 11);
+    assert(!strcmp(p, "hello world"));
+
+    delete [] p;
+
+    cout << "copy test success" << endl;
+}
+
+
+void testSubstr()
+{
+    String s1("hello world");
+
+    String s2(s1.substr());
+
+    assert(!strcmp(s2.c_str(), "hello world"));
+
+    s2 = s1.substr(3);
+    assert(!strcmp(s2.c_str(), "lo world"));
+
+    s2 = s1.substr(5, 50);
+    assert(!strcmp(s2.c_str(), " world"));
+
+    s2 = s1.substr(5, 6);
+    assert(!strcmp(s2.c_str(), " world"));
+
+    try
+    {
+        s2 = s1.substr(50, 6);
+        assert(false);
+    }
+    catch(const char *e) { }
+
+    cout << "substr test success" << endl;
+}
+
+
 void testBug()
 {
     String s1("hello world");
@@ -404,8 +502,11 @@ int main(void)
     testAppend();
     testCompare();
     testErase();
-#endif
     testSwap();
+    testResize();
+    testCopy();
+    testSubstr();
+#endif
 
 
     // testBug();

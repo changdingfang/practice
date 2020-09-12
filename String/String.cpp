@@ -21,7 +21,7 @@ namespace df
         size_ = ::strlen(initValue);
         if (size_ >= String::npos)
         {
-            throw "string too long";
+            throw("string too long");
         }
 
         while (size_ / capacity_)
@@ -65,6 +65,11 @@ namespace df
          * 4. newCap <= baseCapacity
          *   缩减到: baseCapacity
          * */
+        if (newCap > this->max_size())
+        {
+            throw "length too long";
+        }
+
         if (newCap < this->size())
         {
             newCap = this->size();
@@ -85,7 +90,7 @@ namespace df
         }
 
         char *data = new char [newCap + 1];
-        ::strcpy(data, data_);
+        ::memcpy(data, data_, this->size());
         delete [] data_;
         data_ = data;
         capacity_ = newCap;
@@ -134,9 +139,9 @@ namespace df
     }
 
 
-    void String::StringValue::append(const char *data)
+    void String::StringValue::append(const char *data, sizeType count)
     {
-        sizeType size = ::strlen(data) + this->size();
+        sizeType size = count + this->size();
         if (size > this->max_size())
         {
             throw("string too long");
@@ -146,8 +151,29 @@ namespace df
         {
             this->reserve(size);
         }
-        ::strcat(data_, data);
+
+        ::memcpy(data_ + this->size(), data, count);
         size_ = size;
+        data_[this->size()] = '\0';
+    }
+
+
+    void String::StringValue::resize(sizeType count, char ch)
+    {
+        if (count > this->max_size())
+        {
+            throw("string too long");
+        }
+
+        if (this->size() < count)
+        {
+            if (this->capacity() < count)
+            {
+                this->reserve(count);
+            }
+            ::memset(data_ + this->size(), ch, count - this->size());
+        }
+        size_ = count;
         data_[this->size()] = '\0';
     }
 
@@ -176,9 +202,16 @@ namespace df
     }
 
 
+    String::String(String &&r)
+    {
+        pValue_ = r.pValue_;
+        r.pValue_ = nullptr;
+    }
+
+
     String::~String()
     {
-        if (pValue_->minusRefCount() == 0)
+        if (pValue_ && pValue_->minusRefCount() == 0)
         {
             delete pValue_;
             pValue_ = nullptr;
@@ -219,6 +252,25 @@ namespace df
         }
 
         pValue_ = new StringValue(data);
+
+        return *this;
+    }
+
+
+    String &String::operator = (String &&r)
+    {
+        if (pValue_ == r.pValue_)
+        {
+            return *this;
+        }
+
+        if (pValue_->minusRefCount() == 0)
+        {
+            delete pValue_;
+        }
+
+        pValue_ = r.pValue_;
+        r.pValue_ = nullptr;
 
         return *this;
     }
@@ -271,7 +323,7 @@ namespace df
     {
         if (pos >= pValue_->size())
         {
-            throw "pos >= size";
+            throw("pos >= size");
         }
 
         this->refCountCheck_();
@@ -316,7 +368,7 @@ namespace df
 
     void String::push_back(const char &c)
     {
-        this->append(c);
+        this->append(1, c);
     }
 
 
@@ -332,40 +384,62 @@ namespace df
 
     String &String::append(const String &r)
     {
-        return this->append(r.data());
+        return this->append(r.data(), r.size());
+    }
+
+
+    String &String::append(const String &r, sizeType pos, sizeType count)
+    {
+        if (pos > r.size())
+        {
+            throw("out of range");
+        }
+
+        if (pos + count > r.size() || count == String::npos)
+        {
+            count = r.size() - pos;
+        }
+
+        return this->append(r.data() + pos, count);
     }
 
 
     String &String::append(const char *data)
     {
+        return this->append(data, ::strlen(data));
+    }
+
+
+    String &String::append(const char *data, sizeType count)
+    {
         this->refCountCheck_();
-        pValue_->append(data);
+        pValue_->append(data, count);
         return *this;
     }
 
 
-    String &String::append(const char &ch)
+    String &String::append(sizeType count, char ch)
     {
-        const char tmp[2] = { ch };
-        return this->append(tmp);
+        this->resize(this->size() + count, ch);
+        return *this;
     }
 
 
     String &String::operator += (const String &r)
     {
-        return this->append(r.data());
+        return this->append(r.data(), r.size());
     }
 
 
     String &String::operator += (const char *data)
     {
-        return this->append(data);
+        return this->append(data, ::strlen(data));
     }
 
 
-    String &String::operator += (const char &ch)
+    String &String::operator += (char ch)
     {
-        return this->append(ch);
+        return this->append(1, ch);
     }
 
 
@@ -433,6 +507,33 @@ namespace df
         StringValue *p = pValue_;
         pValue_ = r.pValue_;
         r.pValue_ = p;
+    }
+
+
+    String String::substr(sizeType pos, sizeType count) const
+    {
+        return std::move(String("").append(*this, pos, count));
+    }
+
+
+    String::sizeType String::copy(char  *data, sizeType count, sizeType pos) const
+    {
+        if (pos > this->size())
+        {
+            throw("out of range");
+        }
+        if (pos + count > this->size() || count == String::npos)
+        {
+            count = this->size() - pos;
+        }
+        ::memcpy(data, this->data() + pos, count);
+        return count;
+    }
+
+
+    void String::resize(sizeType count, char ch)
+    {
+        pValue_->resize(count, ch);
     }
 
 

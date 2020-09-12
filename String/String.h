@@ -28,16 +28,14 @@ namespace df
         String();
         explicit String(const char *initValue);
         explicit String(const String &r);
-        // TODO
-        // String(String &&r);
+        String(String &&r);
         ~String();
 
         String &operator = (const String &r);
         // TODO
         /* 需要优化字符串赋值操作, 减少delete和new次数 */
         String &operator = (const char *data);
-        // TODO
-        // String &operator = (String &&r);
+        String &operator = (String &&r);
         
         // assign();
 
@@ -76,11 +74,13 @@ namespace df
         void push_back(const char &c);
         void pop_back();
         String &append(const String &r);
-        String &append(const char *data); /* append和+=都依赖于这个 */
-        String &append(const char &ch);
+        String &append(const String &r, sizeType pos, sizeType count);
+        String &append(const char *data);
+        String &append(const char *data, sizeType count); /* append和+=都依赖于这个 */
+        String &append(sizeType count, char ch);
         String &operator += (const String &r);
         String &operator += (const char *data);
-        String &operator += (const char &ch);
+        String &operator += (char ch);
         int compare(const String &r) const;
         int compare(sizeType pos, sizeType count, const String &r) const;
         int compare(sizeType pos1, sizeType count1, const String &r, sizeType pos2, sizeType count2) const;
@@ -89,9 +89,9 @@ namespace df
         int compare(sizeType pos1, sizeType count1, const char *data, sizeType pos2, sizeType count2) const;
         // TODO
         // replace()
-        // substr()
-        // copy()
-        // resize()
+        String substr(sizeType pos = 0, sizeType count = String::npos) const;
+        sizeType copy(char  *data, sizeType count, sizeType pos = 0) const;
+        void resize(sizeType count, char ch = '\0');
         void swap(String &r) noexcept;
         /* * * * * * * * * * * * */
 
@@ -130,6 +130,11 @@ namespace df
             explicit StringValue(const char *initValue);
             ~StringValue();
 
+            StringValue(const StringValue &) = delete;
+            StringValue(StringValue &&) = delete;
+            StringValue &operator = (const StringValue &) = delete;
+            StringValue &operator = (StringValue &&) = delete;
+
             inline char *data() const noexcept { return data_; }
             inline sizeType size() const noexcept { return size_; }
             inline sizeType capacity() const noexcept { return capacity_; }
@@ -144,7 +149,8 @@ namespace df
 
             void clear();
             void erase(sizeType index, sizeType count);
-            void append(const char *data);
+            void append(const char *data, sizeType count);
+            void resize(sizeType count, char ch);
 
         private:
             bool      shareable_;
