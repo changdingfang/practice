@@ -1,8 +1,10 @@
-//***************************************************************
-// @file:    String.h
-// @author:  dingfang
-// @date    2020-09-02 19:35:54
-//***************************************************************
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// FileName:     String.h
+// Author:       dingfang
+// CreateDate:   2020-09-02 19:35:54
+// ModifyAuthor: dingfang
+// ModifyDate:   2020-09-13 14:59:28
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #ifndef __STRING_H__
 #define __STRING_H__
@@ -68,8 +70,12 @@ namespace df
         /* * * * * * * * * * * * */
         /* 操作 */
         void clear();
-        // TODO
-        // void insert();
+        String &insert(sizeType index, sizeType count, char ch);
+        String &insert(sizeType index, const char *data);
+        String &insert(sizeType index, const char *data, sizeType count);
+        String &insert(sizeType index, const String &r);
+        String &insert(sizeType index, const String &r, sizeType indexR, sizeType count = String::npos);
+
         String &erase(sizeType index = 0, sizeType count = String::npos);
         void push_back(const char &c);
         void pop_back();
@@ -87,8 +93,13 @@ namespace df
         int compare(const char *data) const;
         int compare(sizeType pos, sizeType count, const char *data) const;
         int compare(sizeType pos1, sizeType count1, const char *data, sizeType pos2, sizeType count2) const;
+        String &replace(sizeType pos, sizeType count, const String &r);
+        String &replace(sizeType pos, sizeType count, const String &r, sizeType pos2, sizeType count2 = String::npos);
+        String &replace(sizeType pos, sizeType count, const char *data);
+        String &replace(sizeType pos, sizeType count, const char *data, sizeType count2);
         // TODO
-        // replace()
+        // /* 这里用了申请临时空间来构造一个字符串,可优化. */
+        String &replace(sizeType pos, sizeType count, sizeType count2, char ch);
         String substr(sizeType pos = 0, sizeType count = String::npos) const;
         sizeType copy(char  *data, sizeType count, sizeType pos = 0) const;
         void resize(sizeType count, char ch = '\0');
@@ -114,12 +125,20 @@ namespace df
         // getline();
 
     private:
-        void refCountCheck_()
+        inline void refCountCheck_()
         {
             if (pValue_->refCount() > 1)
             {
                 pValue_->minusRefCount();
                 pValue_ = new StringValue(pValue_->data());
+            }
+        }
+
+        inline void refCountDeleteCheck_()
+        {
+            if (pValue_->minusRefCount() == 0)
+            {
+                delete pValue_;
             }
         }
 
@@ -151,6 +170,7 @@ namespace df
             void erase(sizeType index, sizeType count);
             void append(const char *data, sizeType count);
             void resize(sizeType count, char ch);
+            void replace(sizeType pos, sizeType count, const char *data, sizeType count2);
 
         private:
             bool      shareable_;

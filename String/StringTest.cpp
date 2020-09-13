@@ -1,8 +1,10 @@
- //***************************************************************
- // @file:    stringTest.cpp
- // @author:  dingfang
- // @date    2020-09-02 14:49:19
- //***************************************************************
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// FileName:     stringTest.h
+// Author:       dingfang
+// CreateDate:   2020-09-02 14:49:19
+// ModifyAuthor: dingfang
+// ModifyDate:   2020-09-13 14:58:48
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  
 #include "String.h"
 
@@ -472,6 +474,169 @@ void testSubstr()
 }
 
 
+void testReplace()
+{
+    const char *testStr1 = "hello world";
+    const char *testStr2 = "ding fang";
+    String s1;
+    
+    auto testFunc = [&testStr1, &testStr2, &s1](String::sizeType pos, String::sizeType count, const char *expectStr) 
+    {
+        s1 = testStr1;
+        s1.replace(pos, count, testStr2, ::strlen(testStr2));
+        assert(!strcmp(s1.c_str(), expectStr));
+    };
+
+    testFunc(4, 16, "hellding fang");
+    testFunc(0, 0, "ding fanghello world");
+    testFunc(0, 2, "ding fangllo world");
+    testFunc(3, 2, "helding fang world");
+    testFunc(3, 6, "helding fangld");
+    testFunc(4, 7, "hellding fang");
+    testFunc(11, 0, "hello worldding fang");
+    testFunc(11, 11, "hello worldding fang");
+    testFunc(1, 9, "hding fangd");
+    testFunc(0, 11, "ding fang");
+    testFunc(0, 100, "ding fang");
+
+    try
+    {
+        testFunc(::strlen(testStr1) + 1, 0, "");
+        assert(false);
+    }
+    catch(...) { }
+
+    String s2(testStr2);
+    auto testFunc2 = [&testStr1, &testStr2, &s1, &s2]
+        (String::sizeType pos, String::sizeType count
+         , String::sizeType pos2, String::sizeType count2
+         , const char *expectStr) 
+        {
+            s1 = testStr1;
+            s1.replace(pos, count, s2, pos2, count2);
+            assert(!strcmp(s1.c_str(), expectStr));
+        };
+
+    testFunc2(4, 16, 0, s2.size(), "hellding fang");
+    testFunc2(0, 0, 2, s2.size(), "ng fanghello world");
+    testFunc2(0, 2, s2.size(), 0, "hello world");
+    testFunc2(3, 2, 3, 2, "helg  world");
+    testFunc2(3, 2, 3, 4, "helg fa world");
+    testFunc2(3, 2, 2, 20, "helng fang world");
+    testFunc2(3, 6, 0, s2.size() + 1, "helding fangld");
+    testFunc2(4, 7, 5, 1, "hellf");
+    testFunc2(11, 0, 5, 0, "hello world");
+    testFunc2(11, 11, 5, 0, "hello world");
+
+    auto testFunc3 = [&testStr1, &s1](String::sizeType pos, String::sizeType count, String::sizeType count2, const char *expectStr) 
+    {
+        s1 = testStr1;
+        s1.replace(pos, count, count2, 'x');
+
+        assert(!strcmp(s1.c_str(), expectStr));
+    };
+
+    testFunc3(11, 11, 5, "hello worldxxxxx");
+    testFunc3(0, 11, 5, "xxxxx");
+    testFunc3(0, 3, 5, "xxxxxlo world");
+    testFunc3(3, 0, 8, "helxxxxxxxxlo world");
+    testFunc3(3, 5, 8, "helxxxxxxxxrld");
+    testFunc3(4, 2, 6, "hellxxxxxxworld");
+    testFunc3(4, 20, 0, "hell");
+    testFunc3(4, 20, 1, "hellx");
+
+    cout << "replace test success" << endl;
+}
+
+
+void testInsert()
+{
+    const char *testStr1 = "hello world";
+    String s1(testStr1);
+
+    auto testFunc = [&testStr1, &s1] (String::sizeType index, String::sizeType count, const char *expectStr) 
+    {
+        s1 = testStr1;
+        s1.insert(index, count, 'x');
+
+        assert(!strcmp(s1.c_str(), expectStr));
+    };
+
+    testFunc(5, 2, "helloxx world");
+    testFunc(5, 5, "helloxxxxx world");
+    testFunc(0, 3, "xxxhello world");
+    testFunc(0, 1, "xhello world");
+    testFunc(11, 1, "hello worldx");
+
+    try
+    {
+        testFunc(12, 5, "");
+        assert(false);
+    }
+    catch(...) { }
+
+    auto testFunc2 = [&testStr1, &s1] (String::sizeType index, String::sizeType count, const char * data, const char *expectStr) 
+    {
+        s1 = testStr1;
+        if (count == 0)
+        {
+            s1.insert(index, data);
+        }
+        else
+        {
+            s1.insert(index, data, count);
+        }
+
+        assert(!strcmp(s1.c_str(), expectStr));
+    };
+
+    testFunc2(3, 0, "test", "heltestlo world");
+    testFunc2(11, 0, "test", "hello worldtest");
+    testFunc2(0, 0, "test", "testhello world");
+    testFunc2(8, 0, "test", "hello wotestrld");
+    try
+    {
+        testFunc2(12, 0, "test", "heltestlo world");
+        assert(false);
+    }
+    catch(...) { }
+
+    testFunc2(3, 3, "test", "helteslo world");
+    testFunc2(11, 1, "test", "hello worldt");
+    testFunc2(0, 2, "test", "tehello world");
+    testFunc2(8, 2, "test", "hello woterld");
+
+    String s2("ding fang");
+    auto testFunc3 = [&testStr1, &s1, &s2](String::sizeType index, String::sizeType index2, String::sizeType count, const char *expectStr) 
+    {
+        s1 = testStr1;
+        if (index2 == 0)
+        {
+            s1.insert(index, s2);
+        }
+        else
+        {
+            s1.insert(index, s2, index2, count);
+        }
+
+        assert(!strcmp(s1.c_str(), expectStr));
+    };
+
+    testFunc3(8, 0, 0, "hello woding fangrld");
+    testFunc3(2, 0, 0, "heding fangllo world");
+    testFunc3(0, 0, 0, "ding fanghello world");
+    testFunc3(11, 0, 0, "hello worldding fang");
+
+    testFunc3(8, 2, 0, "hello world");
+    testFunc3(8, 2, 2, "hello wongrld");
+    testFunc3(2, 2, 2, "hengllo world");
+    testFunc3(0, 3, 4, "g fahello world");
+    testFunc3(11, 2, 5, "hello worldng fa");
+
+    cout << "insert test success" << endl;
+}
+
+
 void testBug()
 {
     String s1("hello world");
@@ -506,6 +671,8 @@ int main(void)
     testResize();
     testCopy();
     testSubstr();
+    testReplace();
+    testInsert();
 #endif
 
 

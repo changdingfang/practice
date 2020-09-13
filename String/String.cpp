@@ -1,8 +1,10 @@
-//***************************************************************
-// @file:    String.cpp
-// @author:  dingfang
-// @date    2020-09-02 19:40:15
-//***************************************************************
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// FileName:     String.cpp
+// Author:       dingfang
+// CreateDate:   2020-09-02 19:40:15
+// ModifyAuthor: dingfang
+// ModifyDate:   2020-09-13 14:59:09
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #include "String.h"
 #include <string.h>
@@ -178,6 +180,59 @@ namespace df
     }
 
 
+    void String::StringValue::replace(sizeType pos, sizeType count, const char *data, sizeType count2)
+    {
+        const sizeType oldSize = this->size();
+        sizeType newSize = 0;
+        sizeType pc = pos + count;
+
+        if (pos > oldSize)
+        {
+            throw("pos > size()");
+        }
+
+        if (pc > oldSize)
+        {
+            count = oldSize - pos;
+            newSize = pos + count2;
+        }
+        else
+        {
+            /* count2 > count  --> newSize = pos + count2 + (size_ - count - pos) */
+            /* count2 <= count --> newSize = size_ - (count2 - count) */
+            newSize = count2 + oldSize - count;
+        }
+
+        if (newSize > this->capacity())
+        {
+            this->reserve(newSize);
+        }
+
+        if (count2 <= count && pc < oldSize)
+        {
+            for (sizeType i = pos + count2, j = pc; j < oldSize; ++i, ++j)
+            {
+                data_[j] = data_[i];
+            }
+        }
+        else if (count2 > count && pc < oldSize)
+        {
+            for (int i = oldSize, j = newSize; i >= pc && i != -1; --i, --j)
+            {
+                data_[j] = data_[i];
+            }
+        }
+
+        for (sizeType i = pos, j = 0; j < count2; ++i, ++j)
+        {
+            data_[i] = data[j];
+        }
+
+        size_ = newSize;
+        data_[size_] = '\0';
+    }
+
+
     String::String()
         : pValue_(new String::StringValue(""))
     { }
@@ -226,19 +281,18 @@ namespace df
             return *this;
         }
 
-        if (pValue_->minusRefCount() == 0)
-        {
-            delete pValue_;
-        }
-
         if (r.pValue_->shareable())
         {
+            this->refCountDeleteCheck_();
             pValue_ = r.pValue_;
             pValue_->addRefCount();
-            return *this;
         }
-
-        pValue_ = new StringValue(r.pValue_->data());
+        else
+        {
+            StringValue *tmp = new StringValue(r.pValue_->data());
+            this->refCountDeleteCheck_();
+            pValue_ = tmp;
+        }
 
         return *this;
     }
@@ -246,12 +300,9 @@ namespace df
 
     String &String::operator = (const char *data)
     {
-        if (pValue_->minusRefCount() == 0)
-        {
-            delete pValue_;
-        }
-
-        pValue_ = new StringValue(data);
+        StringValue *tmp = new StringValue(data);
+        this->refCountDeleteCheck_();
+        pValue_ = tmp;
 
         return *this;
     }
@@ -259,18 +310,12 @@ namespace df
 
     String &String::operator = (String &&r)
     {
-        if (pValue_ == r.pValue_)
+        if (pValue_ != r.pValue_)
         {
-            return *this;
+            this->refCountDeleteCheck_();
+            pValue_ = r.pValue_;
+            r.pValue_ = nullptr;
         }
-
-        if (pValue_->minusRefCount() == 0)
-        {
-            delete pValue_;
-        }
-
-        pValue_ = r.pValue_;
-        r.pValue_ = nullptr;
 
         return *this;
     }
@@ -354,6 +399,45 @@ namespace df
             return ;
         }
         pValue_->clear();
+    }
+
+
+    String &String::insert(sizeType index, sizeType count, char ch)
+    {
+        return this->replace(index, 0, count, ch);
+    }
+
+
+    String &String::insert(sizeType index, const char *data)
+    {
+        return this->replace(index, 0, data, ::strlen(data));
+    }
+
+
+    String &String::insert(sizeType index, const char *data, sizeType count)
+    {
+        return this->replace(index, 0, data, count);
+    }
+
+
+    String &String::insert(sizeType index, const String &r)
+    {
+        return this->replace(index, 0, r.data(), r.size());
+    }
+
+
+    String &String::insert(sizeType index, const String &r, sizeType indexR, sizeType count)
+    {
+        if (indexR > r.size())
+        {
+            throw("index > size()");
+        }
+        if (count + indexR > r.size())
+        {
+            count = r.size() - indexR;
+        }
+
+        return this->replace(index, 0, r.data() + indexR, count);
     }
 
 
@@ -507,6 +591,67 @@ namespace df
         StringValue *p = pValue_;
         pValue_ = r.pValue_;
         r.pValue_ = p;
+    }
+
+
+    String &String::replace(sizeType pos, sizeType count, const String &r)
+    {
+        return this->replace(pos, count, r, 0, r.size());
+    }
+
+
+    String &String::replace(sizeType pos, sizeType count, const String &r, sizeType pos2, sizeType count2)
+    {
+        if (pos2 < r.size())
+        {
+            if (count2 == String::npos || count2 + pos2 > r.size())
+            {
+                count2 = r.size() - pos2;
+            }
+
+            this->replace(pos, count, r.data() + pos2, count2);
+        }
+        return *this;
+    }
+
+
+    String &String::replace(sizeType pos, sizeType count, const char *data)
+    {
+        return this->replace(pos, count, data, ::strlen(data));
+    }
+
+
+    String &String::replace(sizeType pos, sizeType count, const char *data, sizeType count2)
+    {
+        this->refCountCheck_();
+        pValue_->replace(pos, count, data, count2);
+        return *this;
+    }
+
+
+    String &String::replace(sizeType pos, sizeType count, sizeType count2, char ch)
+    {
+        if (count2 > this->max_size() || count2 == String::npos)
+        {
+            throw("count too long");
+        }
+
+        char *p = new char[count2];
+        ::memset(p, ch, count2);
+
+        try
+        {
+            this->replace(pos, count, p, count2);
+        }
+        catch(...) 
+        { 
+            delete [] p;
+            throw; 
+        }
+
+        delete [] p;
+
+        return *this;
     }
 
 
