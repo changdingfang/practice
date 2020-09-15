@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:40:15
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-13 14:59:09
+// ModifyDate:   2020-09-14 18:21:54
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #include "String.h"
@@ -321,6 +321,36 @@ namespace df
     }
 
 
+    String operator + (const String &l, const String &r)
+    {
+        return std::move(String(l.data()).append(r.data(), r.size()));
+    }
+
+
+    String operator + (const char *data, const String &r)
+    {
+        return std::move(String(r.data()).append(data, ::strlen(data)));
+    }
+
+
+    String operator + (const String &l, const char *data)
+    {
+        return std::move(String(l.data()).append(data, ::strlen(data)));
+    }
+
+
+    String operator + (const String &l, char ch)
+    {
+        return std::move(String(l.data()).append(1, ch));
+    }
+
+
+    String operator + (char ch, const String &r)
+    {
+        return std::move(String(r.data()).append(1, ch));
+    }
+
+
     char &String::operator [] (int index)
     {
         /* 悲观认为只要是该操作符就认为会修改,不再共享 */
@@ -582,18 +612,6 @@ namespace df
     }
 
 
-    void String::swap(String &r) noexcept
-    {
-        if (pValue_ == r.pValue_)
-        {
-            return ;
-        }
-        StringValue *p = pValue_;
-        pValue_ = r.pValue_;
-        r.pValue_ = p;
-    }
-
-
     String &String::replace(sizeType pos, sizeType count, const String &r)
     {
         return this->replace(pos, count, r, 0, r.size());
@@ -682,6 +700,102 @@ namespace df
     }
 
 
+    void String::swap(String &r) noexcept
+    {
+        if (pValue_ == r.pValue_)
+        {
+            return ;
+        }
+        StringValue *p = pValue_;
+        pValue_ = r.pValue_;
+        r.pValue_ = p;
+    }
+
+
+    String::sizeType String::find(const String &r, sizeType pos) const
+    {
+        return this->find(r.data(), pos, r.size());
+    }
+
+
+    String::sizeType String::find(const char *data, sizeType pos) const
+    {
+        return this->find(data, pos, ::strlen(data));
+    }
+
+
+    String::sizeType String::find(const char *data, sizeType pos, sizeType count) const
+    {
+        return this->find_(data, pos, count, 1);
+    }
+
+
+    String::sizeType String::find(const char ch, sizeType pos) const
+    {
+        char tmp[ ] = {ch, '\0'};
+        return this->find(tmp, pos, 1);
+    }
+
+
+    String::sizeType String::rfind(const String &r, sizeType pos) const
+    {
+        return this->rfind(r.data(), pos, r.size());
+    }
+
+
+    String::sizeType String::rfind(const char *data, sizeType pos) const
+    {
+        return this->rfind(data, pos, ::strlen(data));
+    }
+
+
+    String::sizeType String::rfind(const char *data, sizeType pos, sizeType count) const
+    {
+        return this->find_(data, pos, count, String::npos);
+    }
+
+
+    String::sizeType String::rfind(const char ch, sizeType pos) const
+    {
+        char tmp[ ] = {ch, '\0'};
+        return this->rfind(tmp, pos, 1);
+    }
+
+
+    String::sizeType String::find_(const char *data, sizeType pos, sizeType count, sizeType num) const
+    {
+        if (count > this->size())
+        {
+            return String::npos;
+        }
+
+        sizeType lastPos = String::npos;
+        sizeType currNum = 0;
+        for (sizeType i = pos; i + count < this->size(); ++i)
+        {
+            sizeType j = 0, k = i;
+            for (; j < count; ++j, ++k)
+            {
+                if (this->data()[k] != data[j])
+                {
+                    break;
+                }
+            }
+
+            if (j == count)
+            {
+                lastPos = i;
+                if (++currNum == num)
+                {
+                    break;
+                }
+            }
+        }
+
+        return lastPos;
+    }
+
+
     bool operator == (const String &l, const String &r)
     {
         return !l.compare(r);
@@ -716,7 +830,6 @@ namespace df
     {
         return num1 > num2 ? num2 : num1;
     }
-
 
 
 }; /* end of namespace df */

@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 14:49:19
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-13 14:58:48
+// ModifyDate:   2020-09-13 16:46:37
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  
 #include "String.h"
@@ -637,6 +637,38 @@ void testInsert()
 }
 
 
+void testFind()
+{
+    /*                   10        20*/
+    /*         012345678901234567890*/
+    String s1("hello world ding fang");
+
+    assert(s1.find("ding") == 12);
+    assert(s1.find(" ") == 5);
+    assert(s1.find("world") == 6);
+    assert(s1.find("dingx") == String::npos);
+    assert(s1.find(" d") == 11);
+    assert(s1.find('n') == 14);
+    assert(s1.find(' ', 6) == 11);
+
+    String s2("d ");
+    assert(s1.find(s2) == 10);
+
+    assert(s1.find(" ", 6) == 11);
+    assert(s1.find("ding test", 6, 5) == 12);
+    s2 = s1 + "hello";
+    assert(s1.find(s2, 0) == String::npos);
+
+
+    assert(s1.rfind(" ", 0) == 16);
+    assert(s1.rfind("l", 0) == 9);
+    assert(s1.rfind("ng", 0) == 14);
+    assert(s1.rfind("dingx", 0) == String::npos);
+
+    cout << "find test success" << endl;
+}
+
+
 void testBug()
 {
     String s1("hello world");
@@ -674,6 +706,8 @@ int main(void)
     testReplace();
     testInsert();
 #endif
+
+    testFind();
 
 
     // testBug();

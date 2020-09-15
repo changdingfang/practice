@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:35:54
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-13 14:59:28
+// ModifyDate:   2020-09-14 18:17:54
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #ifndef __STRING_H__
@@ -110,9 +110,16 @@ namespace df
         // TODO
         /* * * * * * * * * * * * */
         /* 查找 */
-        // find()
-        // rfine()
-        // find_first_of()
+        /* 采用的比较暴力,可优化成KMP算法 */
+        sizeType find(const String &r, sizeType pos = 0) const;
+        sizeType find(const char *data, sizeType pos = 0) const;
+        sizeType find(const char *data, sizeType pos, sizeType count) const;
+        sizeType find(const char ch, sizeType pos = 0) const;
+        sizeType rfind(const String &r, sizeType pos = 0) const;
+        sizeType rfind(const char *data, sizeType pos = 0) const;
+        sizeType rfind(const char *data, sizeType pos, sizeType count) const;
+        sizeType rfind(const char ch, sizeType pos = 0) const;
+        // find_first_of();
         // find_first_not_of()
         // find_last_of()
         // find_last_not_of()
@@ -125,6 +132,13 @@ namespace df
         // getline();
 
     private:
+        /* 查找 */
+        /* 
+         * 采用的比较暴力,且把后项查找和前项查找基层到一起,效率更低, 
+         * 可优化成KMP算法,后项查找可分离出来反向查 
+         * */
+        sizeType find_(const char *data, sizeType pos, sizeType count, sizeType num) const;
+
         inline void refCountCheck_()
         {
             if (pValue_->refCount() > 1)
@@ -183,6 +197,11 @@ namespace df
         StringValue *pValue_;
     };
 
+    String operator + (const String &l, const String &r);
+    String operator + (const String &l, const char *data);
+    String operator + (const char *data, const String &r);
+    String operator + (const String &l, char ch);
+    String operator + (char ch, const String &r);
     bool operator == (const String &l, const String &r);
     bool operator == (const String &l, const char *data);
     bool operator == (const char *data, const String &r);
