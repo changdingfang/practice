@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:35:54
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-20 11:18:35
+// ModifyDate:   2020-09-20 11:46:38
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #ifndef __STRING_H__
@@ -34,8 +34,6 @@ namespace df
         ~String();
 
         String &operator = (const String &r);
-        // TODO
-        /* 需要优化字符串赋值操作, 减少delete和new次数 */
         String &operator = (const char *data);
         String &operator = (String &&r);
 
@@ -97,8 +95,6 @@ namespace df
         String &replace(sizeType pos, sizeType count, const String &r, sizeType pos2, sizeType count2 = String::npos);
         String &replace(sizeType pos, sizeType count, const char *data);
         String &replace(sizeType pos, sizeType count, const char *data, sizeType count2);
-        // TODO
-        // /* 这里用了申请临时空间来构造一个字符串,可优化. */
         String &replace(sizeType pos, sizeType count, sizeType count2, char ch);
         String substr(sizeType pos = 0, sizeType count = String::npos) const;
         sizeType copy(char  *data, sizeType count, sizeType pos = 0) const;
@@ -193,6 +189,10 @@ namespace df
             void append(const char *data, sizeType count);
             void resize(sizeType count, char ch);
             void replace(sizeType pos, sizeType count, const char *data, sizeType count2);
+            void replace(sizeType pos, sizeType count, sizeType count2, char ch);
+
+        private:
+            void replacePre_(sizeType pos, sizeType count, sizeType count2);
 
         private:
             bool      shareable_;

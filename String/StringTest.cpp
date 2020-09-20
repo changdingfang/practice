@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 14:49:19
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-19 23:00:25
+// ModifyDate:   2020-09-20 11:54:56
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  
 #include "String.h"
@@ -192,6 +192,20 @@ void check(const String &s, String::sizeType size, String::sizeType capacity)
 }
 
 
+void check(const string &s, String::sizeType size, String::sizeType capacity)
+{
+#if 0
+    cout << "length: " << s.length() << endl;
+    cout << "__size: " << s.size() << endl;
+    cout << "capacity: " << s.capacity() << endl;
+    cout << "- - - - - " << endl;
+#endif
+    assert(s.length() == size);
+    assert(s.size() == size);
+    assert(s.capacity() == capacity);
+}
+
+
 void testReserve()
 {
     String s;
@@ -237,7 +251,16 @@ void testReserve()
     check(s, 17, 17);
 
     s = "12345";
+    check(s, 5, 17);
+
+    /* 
+     * 这里与string不同,这里是重新构造了一个新的String, 属性都是全新的 
+     * 而string里面的成员数据可能继承的是旧的
+     * */
+    String s2(s);
+    s = "12345";
     check(s, 5, 15);
+    // check(s, 5, 17); /* 如果是string, 这里应该是这样的 */
 
     cout << "reserve test success" << endl;
 }
@@ -798,7 +821,7 @@ void testBug()
 
 int main(void)
 {
-#if 0
+#if 1
     testRefCount();
     testIndex();
     testFront();

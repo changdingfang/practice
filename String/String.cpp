@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:40:15
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-20 11:18:31
+// ModifyDate:   2020-09-20 11:54:45
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #include "String.h"
@@ -182,6 +182,24 @@ namespace df
 
     void String::StringValue::replace(sizeType pos, sizeType count, const char *data, sizeType count2)
     {
+        this->replacePre_(pos, count, count2);
+
+        for (sizeType i = pos, j = 0; j < count2; ++i, ++j)
+        {
+            data_[i] = data[j];
+        }
+    }
+
+
+    void String::StringValue::replace(sizeType pos, sizeType count, sizeType count2, char ch)
+    {
+        this->replacePre_(pos, count, count2);
+        ::memset(data_ + pos, ch, count2);
+    }
+
+
+    void String::StringValue::replacePre_(sizeType pos, sizeType count, sizeType count2)
+    {
         const sizeType oldSize = this->size();
         sizeType newSize = 0;
         sizeType pc = pos + count;
@@ -221,11 +239,6 @@ namespace df
             {
                 data_[j] = data_[i];
             }
-        }
-
-        for (sizeType i = pos, j = 0; j < count2; ++i, ++j)
-        {
-            data_[i] = data[j];
         }
 
         size_ = newSize;
@@ -300,9 +313,16 @@ namespace df
 
     String &String::operator = (const char *data)
     {
-        StringValue *tmp = new StringValue(data);
-        this->refCountDeleteCheck_();
-        pValue_ = tmp;
+        if (pValue_->refCount() == 1)
+        {
+            pValue_->replace(0, this->size(), data, ::strlen(data));
+        }
+        else
+        {
+            StringValue *tmp = new StringValue(data);
+            pValue_->minusRefCount();
+            pValue_ = tmp;
+        }
 
         return *this;
     }
@@ -649,26 +669,7 @@ namespace df
 
     String &String::replace(sizeType pos, sizeType count, sizeType count2, char ch)
     {
-        if (count2 > this->max_size() || count2 == String::npos)
-        {
-            throw("count too long");
-        }
-
-        char *p = new char[count2];
-        ::memset(p, ch, count2);
-
-        try
-        {
-            this->replace(pos, count, p, count2);
-        }
-        catch(...) 
-        { 
-            delete [] p;
-            throw; 
-        }
-
-        delete [] p;
-
+        pValue_->replace(pos, count, count2, ch);
         return *this;
     }
 
