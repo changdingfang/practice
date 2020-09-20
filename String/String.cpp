@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:40:15
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-20 11:54:45
+// ModifyDate:   2020-09-20 12:36:06
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #include "String.h"
@@ -425,6 +425,25 @@ namespace df
         pValue_->markUnshareable();
 
         return pValue_->data()[pos];
+    }
+
+
+    const char *String::data() const
+    { 
+        if (pValue_->refCount() > 1)
+        {
+            pValue_->minusRefCount();
+            StringValue **p = const_cast<StringValue **>(&pValue_);
+            *p = new StringValue(pValue_->data());
+        }
+        pValue_->markUnshareable();
+        return pValue_->data();
+    }
+
+
+    const char *String::c_str() const
+    {
+        return this->data();
     }
 
 

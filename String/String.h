@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:35:54
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-20 11:46:38
+// ModifyDate:   2020-09-20 12:46:13
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #ifndef __STRING_H__
@@ -47,8 +47,8 @@ namespace df
         const char &operator [] (int index) const;
         char &front();
         char &back();
-        inline const char *data() const noexcept { return pValue_->data(); }
-        inline const char *c_str() const noexcept { return pValue_->data(); }
+        const char *data() const;
+        const char *c_str() const;
         char &at(String::sizeType pos);
         /* * * * * * * * * * * * */
 
