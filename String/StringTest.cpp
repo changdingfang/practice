@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 14:49:19
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-20 12:11:09
+// ModifyDate:   2020-09-20 14:00:32
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  
 #include "String.h"
@@ -210,7 +210,7 @@ void testReserve()
 {
     String s;
     check(s, 0, 15);
-    assert(s.capacity());
+    assert(s.capacity() == 15);
 
     s = "hello world";
     check(s, 11, 15);
@@ -843,8 +843,6 @@ int main(void)
     // testIstrem();
     // testGetline();
 #endif
-
-
 
     // testBug();
 

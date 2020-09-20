@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:35:54
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-20 12:46:13
+// ModifyDate:   2020-09-20 13:56:54
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #ifndef __STRING_H__
@@ -21,10 +21,6 @@ namespace df
         typedef unsigned long int sizeType;
         static constexpr sizeType npos = -1;
         static constexpr sizeType baseCapacity = 15;
-        // TODO
-        /* 15字节以内的使用栈 */
-
-        static int compare(const char *data1, const char *data2, String::sizeType size);
 
     public:
         String();
@@ -174,7 +170,7 @@ namespace df
 
             inline char *data() const noexcept { return data_; }
             inline sizeType size() const noexcept { return size_; }
-            inline sizeType capacity() const noexcept { return capacity_; }
+            inline sizeType capacity() const noexcept { return isLocal_ ? String::baseCapacity : capacity_; }
             inline sizeType max_size() const noexcept { return (String::npos - 1) / 2; }
             inline sizeType addRefCount() noexcept { return ++refCount_; }
             inline sizeType minusRefCount() noexcept { return --refCount_; }
@@ -196,9 +192,16 @@ namespace df
 
         private:
             bool      shareable_;
+            bool      isLocal_;
+
+            /* 15字节以内的使用栈 */
+            union 
+            {
+                char        localBuf_[String::baseCapacity + 1];
+                sizeType    capacity_;
+            };
             sizeType  refCount_;
             sizeType  size_;
-            sizeType  capacity_;
             char      *data_;
         };
 
@@ -269,6 +272,7 @@ namespace df
         }
 
 
+    int compare(const char *data1, const char *data2, String::sizeType size);
     inline int min(String::sizeType num1, String::sizeType num2);
 
 

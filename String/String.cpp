@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:40:15
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-20 12:36:06
+// ModifyDate:   2020-09-20 13:49:06
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #include "String.h"
@@ -17,6 +17,7 @@ namespace df
 
     String::StringValue::StringValue(const char *initValue)
         : refCount_(1)
+          , isLocal_(false)
           , capacity_(baseCapacity)
           , shareable_(true)
     {
@@ -40,7 +41,15 @@ namespace df
             }
         }
 
-        data_ = new char [capacity_ + 1];
+        if (capacity_ <= String::baseCapacity)
+        {
+            isLocal_ = true;
+            data_ = localBuf_;
+        }
+        else
+        {
+            data_ = new char [capacity_ + 1];
+        }
         ::memset(data_, 0x00, capacity_ + 1);
         ::strcpy(data_, initValue);
     }
@@ -48,10 +57,13 @@ namespace df
 
     String::StringValue::~StringValue()
     {
+        if (!isLocal_)
+        {
+            delete [] data_;
+            data_ = nullptr;
+        }
         capacity_ = 0;
         size_ = 0;
-        delete [] data_;
-        data_ = nullptr;
     }
 
 
@@ -91,11 +103,28 @@ namespace df
             }
         }
 
-        char *data = new char [newCap + 1];
-        ::memcpy(data, data_, this->size());
-        delete [] data_;
-        data_ = data;
-        capacity_ = newCap;
+        if (newCap <= String::baseCapacity)
+        {
+            if (!isLocal_)
+            {
+                ::memcpy(localBuf_, data_, this->size());
+                delete [] data_;
+                data_ = localBuf_;
+            }
+            isLocal_ = true;
+        }
+        else
+        {
+            char *data = new char [newCap + 1];
+            ::memcpy(data, data_, this->size());
+            if (!isLocal_)
+            {
+                delete [] data_;
+            }
+            data_ = data;
+            capacity_ = newCap;
+            isLocal_ = false;
+        }
     }
 
 
@@ -645,7 +674,7 @@ namespace df
         }
 
         const sizeType size = min(count1, count2);
-        int res = compare(this->data() + pos1, data + pos2, size);
+        int res = df::compare(this->data() + pos1, data + pos2, size);
 
         return res ? res : !(count1 == count2);
     }
@@ -1086,7 +1115,7 @@ namespace df
     }
 
 
-    int String::compare(const char *data1, const char *data2, String::sizeType size)
+    int compare(const char *data1, const char *data2, String::sizeType size)
     {
         return ::strncmp(data1, data2, size);
     }
