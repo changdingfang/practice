@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:35:54
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-14 18:17:54
+// ModifyDate:   2020-09-20 11:18:35
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #ifndef __STRING_H__
@@ -18,7 +18,7 @@ namespace df
     class String final
     {
     public:
-        typedef unsigned int sizeType;
+        typedef unsigned long int sizeType;
         static constexpr sizeType npos = -1;
         static constexpr sizeType baseCapacity = 15;
         // TODO
@@ -38,7 +38,7 @@ namespace df
         /* 需要优化字符串赋值操作, 减少delete和new次数 */
         String &operator = (const char *data);
         String &operator = (String &&r);
-        
+
         // assign();
 
         /* * * * * * * * * * * * */
@@ -119,17 +119,25 @@ namespace df
         sizeType rfind(const char *data, sizeType pos = 0) const;
         sizeType rfind(const char *data, sizeType pos, sizeType count) const;
         sizeType rfind(const char ch, sizeType pos = 0) const;
-        // find_first_of();
-        // find_first_not_of()
-        // find_last_of()
-        // find_last_not_of()
+        sizeType find_first_of(const String &r, sizeType pos = 0) const;
+        sizeType find_first_of(const char *data, sizeType pos = 0) const;
+        sizeType find_first_of(const char *data, sizeType pos, sizeType count) const;
+        sizeType find_first_of(const char ch, sizeType pos = 0) const;
+        sizeType find_first_not_of(const String &r, sizeType pos = 0) const;
+        sizeType find_first_not_of(const char *data, sizeType pos = 0) const;
+        sizeType find_first_not_of(const char *data, sizeType pos, sizeType count) const;
+        sizeType find_first_not_of(const char ch, sizeType pos = 0) const;
+        sizeType find_last_of(const String &r, sizeType pos = String::npos) const;
+        sizeType find_last_of(const char *data, sizeType pos = String::npos) const;
+        sizeType find_last_of(const char *data, sizeType pos, sizeType count) const;
+        sizeType find_last_of(const char ch, sizeType pos = String::npos) const;
+        sizeType find_last_not_of(const String &r, sizeType pos = String::npos) const;
+        sizeType find_last_not_of(const char *data, sizeType pos = String::npos) const;
+        sizeType find_last_not_of(const char *data, sizeType pos, sizeType count) const;
+        sizeType find_last_not_of(const char ch, sizeType pos = String::npos) const;
         /* * * * * * * * * * * * */
 
         sizeType refCount() const noexcept { return pValue_->refCount(); }
-
-        // TODO
-        // operator >> ();
-        // getline();
 
     private:
         /* 查找 */
@@ -197,6 +205,8 @@ namespace df
         StringValue *pValue_;
     };
 
+    inline char eof() { return _GLIBCXX_STDIO_EOF; /* -1 */ };
+
     String operator + (const String &l, const String &r);
     String operator + (const String &l, const char *data);
     String operator + (const char *data, const String &r);
@@ -206,6 +216,57 @@ namespace df
     bool operator == (const String &l, const char *data);
     bool operator == (const char *data, const String &r);
     std::ostream &operator << (std::ostream &s, const String &r);
+    std::istream &operator >> (std::istream &s, String &r);
+    template <class Char_T, class Is>
+        Is &getline(Is &s, Char_T &r)
+        {
+            r.erase();
+            String::sizeType count = 0;
+            char ch = static_cast<char>(s.rdbuf()->sgetc());
+            char buf[128];
+            const char eof = df::eof();
+            std::ios_base::iostate err = std::ios_base::goodbit;
+            String::sizeType len = 0;
+
+            while (count < r.max_size() && ch != eof && ch != '\n')
+            {
+                if (len == sizeof(buf))
+                {
+                    r.append(buf, sizeof(buf));
+                    len = 0;
+                }
+                buf[len++] = ch;
+                ch = static_cast<char>(s.rdbuf()->snextc());
+                ++count;
+            }
+            r.append(buf, len);
+
+            if (ch == eof)
+            {
+                err |= std::ios_base::eofbit;
+            }
+            else if (ch == '\n')
+            {
+                ++count;
+                s.rdbuf()->sbumpc();
+            }
+            else
+            {
+                err |= std::ios_base::failbit;
+            }
+
+            if (!count)
+            {
+                err |= std::ios_base::failbit;
+            }
+
+            if (err)
+            {
+                s.setstate(err);
+            }
+
+            return s;
+        }
 
 
     inline int min(String::sizeType num1, String::sizeType num2);

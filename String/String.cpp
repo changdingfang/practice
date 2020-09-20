@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:40:15
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-14 18:21:54
+// ModifyDate:   2020-09-20 11:18:31
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #include "String.h"
@@ -796,6 +796,207 @@ namespace df
     }
 
 
+    String::sizeType String::find_first_of(const String &r, sizeType pos) const
+    {
+        return this->find_first_of(r.data(), pos, r.size());
+    }
+
+
+    String::sizeType String::find_first_of(const char *data, sizeType pos) const
+    {
+        return this->find_first_of(data, pos, ::strlen(data));
+    }
+
+
+    String::sizeType String::find_first_of(const char *data, sizeType pos, sizeType count) const
+    {
+        for (sizeType i = pos; i < this->size(); ++i)
+        {
+            for (sizeType j = 0; j < count; ++j)
+            {
+                if (this->data()[i] == data[j])
+                {
+                    return i;
+                }
+            }
+        }
+        return String::npos;
+    }
+
+
+    String::sizeType String::find_first_of(const char ch, sizeType pos) const
+    {
+        for (sizeType i = pos; i < this->size(); ++i)
+        {
+            if (this->data()[i] == ch)
+            {
+                return i;
+            }
+        }
+        return String::npos;
+    }
+
+
+    String::sizeType String::find_first_not_of(const String &r, sizeType pos) const
+    {
+        return this->find_first_not_of(r.data(), pos, r.size());
+    }
+
+
+    String::sizeType String::find_first_not_of(const char *data, sizeType pos) const
+    {
+        return this->find_first_not_of(data, pos, ::strlen(data));
+    }
+
+
+    String::sizeType String::find_first_not_of(const char *data, sizeType pos, sizeType count) const
+    {
+        for (sizeType i = pos; i < this->size(); ++i)
+        {
+            sizeType j = 0;
+            for (; j < count; ++j)
+            {
+                if (this->data()[i] == data[j])
+                {
+                    break;
+                }
+            }
+
+            if (j == count)
+            {
+                return i;
+            }
+        }
+        return String::npos;
+    }
+
+
+    String::sizeType String::find_first_not_of(const char ch, sizeType pos) const
+    {
+        for (sizeType i = pos; i < this->size(); ++i)
+        {
+            if (this->data()[i] != ch)
+            {
+                return i;
+            }
+        }
+
+        return String::npos;
+    }
+
+
+    String::sizeType String::find_last_of(const String &r, sizeType pos) const
+    {
+        return this->find_last_of(r.data(), pos, r.size());
+    }
+
+
+    String::sizeType String::find_last_of(const char *data, sizeType pos) const
+    {
+        return this->find_last_of(data, pos, ::strlen(data));
+    }
+
+
+    String::sizeType String::find_last_of(const char *data, sizeType pos, sizeType count) const
+    {
+        if (pos >= this->size())
+        {
+            pos = this->size() - 1;
+        }
+
+        for (sizeType i = pos; i >= 0 && i != String::npos; --i)
+        {
+            for (sizeType j = 0; j < count; ++j)
+            {
+                if (this->data()[i] == data[j])
+                {
+                    return i;
+                }
+            }
+        }
+
+        return String::npos;
+    }
+
+
+    String::sizeType String::find_last_of(const char ch, sizeType pos) const
+    {
+        if (pos >= this->size())
+        {
+            pos = this->size() - 1;
+        }
+
+        for (sizeType i = pos; i >= 0 && i != String::npos; --i)
+        {
+            if (this->data()[i] == ch)
+            {
+                return i;
+            }
+        }
+
+        return String::npos;
+    }
+
+
+    String::sizeType String::find_last_not_of(const String &r, sizeType pos) const
+    {
+        return this->find_last_not_of(r.data(), pos, r.size());
+    }
+
+
+    String::sizeType String::find_last_not_of(const char *data, sizeType pos) const
+    {
+        return this->find_last_not_of(data, pos, ::strlen(data));
+    }
+
+
+    String::sizeType String::find_last_not_of(const char *data, sizeType pos, sizeType count) const
+    {
+        if (pos >= this->size())
+        {
+            pos = this->size() - 1;
+        }
+
+        for (sizeType i = pos; i >= 0 && i != String::npos; --i)
+        {
+            sizeType j = 0;
+            for (; j < count; ++j)
+            {
+                if (this->data()[i] == data[j])
+                {
+                    break;
+                }
+            }
+
+            if (j == count)
+            {
+                return i;
+            }
+        }
+
+        return String::npos;
+    }
+
+
+    String::sizeType String::find_last_not_of(const char ch, sizeType pos) const
+    {
+        if (pos >= this->size())
+        {
+            pos = this->size() - 1;
+        }
+
+        for (sizeType i = pos; i >= 0 && i != String::npos; --i)
+        {
+            if (this->data()[i] != ch)
+            {
+                return i;
+            }
+        }
+
+        return String::npos;
+    }
+
+
     bool operator == (const String &l, const String &r)
     {
         return !l.compare(r);
@@ -817,6 +1018,51 @@ namespace df
     std::ostream &operator << (std::ostream &s, const String &r)
     {
         return r.size() == 0 ? s : s << r.data();
+    }
+
+
+    std::istream &operator >> (std::istream &s, String &r)
+    {
+        r.erase();
+        String::sizeType count = 0;
+        char ch = static_cast<char>(s.rdbuf()->sgetc());
+        char buf[128];
+        const char eof = df::eof();
+        cout << "width: " << s.width() << endl;
+        std::ios_base::iostate err = std::ios_base::goodbit;
+        String::sizeType len = 0;
+
+        while (count < r.max_size() && ch != eof && ch != '\n' && ch != ' ' && ch != '\t')
+        {
+            if (len == sizeof(buf))
+            {
+                r.append(buf, sizeof(buf));
+                len = 0;
+            }
+            buf[len++] = ch;
+            ch = static_cast<char>(s.rdbuf()->snextc());
+            ++count;
+        }
+
+        if (ch == eof)
+        {
+            err |= std::ios_base::eofbit;
+            s.width(0);
+        }
+
+        if (!count)
+        {
+            err |= std::ios_base::failbit;
+        }
+
+        if (err)
+        {
+            s.setstate(err);
+        }
+
+        r.append(buf, len);
+
+        return s;
     }
 
 

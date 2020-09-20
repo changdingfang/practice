@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 14:49:19
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-13 16:46:37
+// ModifyDate:   2020-09-19 23:00:25
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  
 #include "String.h"
@@ -12,6 +12,8 @@
 #include <string.h>
 
 #include <iostream>
+#include <sstream>
+#include <fstream>
 
 using namespace std;
 using namespace df;
@@ -669,6 +671,114 @@ void testFind()
 }
 
 
+void testFindFirst()
+{
+    String s1("abcdefghijklmnopqrstuvwxyz0123456789");
+
+    assert(s1.find_first_of("01i", 0, 3) == 8);
+    assert(s1.find_first_of("01", 0, 2) == 26);
+    assert(s1.find_first_of("-^!@", 0, 4) == String::npos);
+    assert(s1.find_first_of("-9", 0, 2) == 35);
+    assert(s1.find_first_of("+-9*&#", 0, 6) == 35);
+    assert(s1.find_first_of("fg9", 15, 3) == 35);
+    assert(s1.find_first_of("+kj-9*&#", 20, 8) == 35);
+    assert(s1.find_first_of("+kj-9*&#", String::npos, 8) == String::npos);
+
+    assert(s1.find_first_of("+-0*&#") == 26);
+    assert(s1.find_first_of("+-0*&#", 1) == 26);
+    assert(s1.find_first_of("+-0*&#", 26) == 26);
+    assert(s1.find_first_of("+-0*&#", 27) == String::npos);
+
+    assert(s1.find_first_of('c', 27) == String::npos);
+    assert(s1.find_first_of('c', 1) == 2);
+    assert(s1.find_first_of('c') == 2);
+    assert(s1.find_first_of('9') == 35);
+
+
+    assert(s1.find_first_not_of("abcdemnfg9") == 7);
+    assert(s1.find_first_not_of("demnfabcg9") == 7);
+    assert(s1.find_first_not_of("demnfabcg9", 12) == 14);
+    assert(s1.find_first_not_of("demnfabcg9", 12, 4) == 14);
+    assert(s1.find_first_not_of("demnfabcg9", 12, 3) == 13);
+    assert(s1.find_first_not_of("demnfabcg9", 12, 2) == 12);
+    assert(s1.find_first_not_of("demnfabcg9", 0, 5) == 0);
+    assert(s1.find_first_not_of("demnfabcg9", String::npos, 5) == String::npos);
+    assert(s1.find_first_not_of('d') == 0);
+    assert(s1.find_first_not_of('d', 3) == 4);
+
+
+    assert(s1.find_last_of("01i", 0, 3) == String::npos);
+    assert(s1.find_last_of("01", String::npos, 2) == 27);
+    assert(s1.find_last_of("-^!@", String::npos, 4) == String::npos);
+    assert(s1.find_last_of("-9", String::npos, 2) == 35);
+    assert(s1.find_last_of("+-9*&#", String::npos, 6) == 35);
+    assert(s1.find_last_of("fg9", 15, 3) == 6);
+    assert(s1.find_last_of("+kj-9*&#", 20, 8) == 10);
+
+    assert(s1.find_last_of("+-0*&#") == 26);
+    assert(s1.find_last_of("+-0*&#", 1) == String::npos);
+    assert(s1.find_last_of("+-0*&#", 26) == 26);
+    assert(s1.find_last_of("+-0*&#", 27) == 26);
+
+    assert(s1.find_last_of('c', 27) == 2);
+    assert(s1.find_last_of('c', 1) == String::npos);
+    assert(s1.find_last_of('c') == 2);
+    assert(s1.find_last_of('9') == 35);
+
+
+    assert(s1.find_last_not_of("demnfabcg9") == 34);
+    assert(s1.find_last_not_of("demnfabcg9", 12) == 11);
+    assert(s1.find_last_not_of("demnfabcg9", 12, 4) == 11);
+    assert(s1.find_last_not_of("demnfabcg9", 12, 3) == 11);
+    assert(s1.find_last_not_of("demnfabcg9", 12, 2) == 12);
+    assert(s1.find_last_not_of("demnfabcg9", 0, 5) == 0);
+    assert(s1.find_last_not_of('d') == 35);
+    assert(s1.find_last_not_of('d', 3) == 2);
+
+    cout << "find first test success" << endl;
+}
+
+
+void testIstrem()
+{
+    String s;
+
+    cout << "等待输入: " << endl;
+    cin >> s;
+    /* input: hello world       output: hello */
+    /* input: hello    world    output: hello (这里输入的空白是\t)*/
+    /* input: helloworld        output: helloworld */
+    cout << s << endl;
+
+    cout << "istream test success" << endl;
+}
+
+
+void testGetline()
+{
+    String s;
+
+    cout << "等待输入: " << endl;
+    df::getline(cin, s);
+    cout << s << endl;
+
+    std::istringstream input;
+    input.str("1\n2\n3\n4\n5\n6\n7\n");
+    for (String line; df::getline(input, line); )
+    {
+        cout << "line: " << line << endl;
+    }
+
+    ifstream ifs("./test.txt");
+    for (String s2; df::getline(ifs, s2); )
+    {
+        cout << "file line: " << s2 << endl;
+    }
+
+    cout << "getline test success" << endl;
+}
+
+
 void testBug()
 {
     String s1("hello world");
@@ -705,9 +815,12 @@ int main(void)
     testSubstr();
     testReplace();
     testInsert();
+    testFind();
+    testFindFirst();
+    // testIstrem();
+    // testGetline();
 #endif
 
-    testFind();
 
 
     // testBug();
