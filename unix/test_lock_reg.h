@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2020-12-28 20:36:08
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2020-12-28 21:28:02
+//  ModifyDate:   2020-12-30 18:58:43
 // =======================================================================
 
 #ifndef __TEST_LOCK_REG_H__
@@ -144,6 +144,26 @@ static pid_t lock_test(int fd, int type, off_t offset, int whence, off_t len)
 #define un_lock(fd, offset, whence, len) \
     (lock_reg((fd), F_SETLK, F_UNLCK, (offset), (whence), (len)))
 
+
+
+void set_fl(int fd, int flags)
+{
+    int val;
+
+    if ((val = fcntl(fd, F_GETFL, 0)) < 0)
+    {
+        printf("fcntl GET failed!\n");
+        exit(-1);
+    }
+
+    val |= flags;
+
+    if ((val = fcntl(fd, F_SETFL, 0)) < 0)
+    {
+        printf("fcntl SET failed!\n");
+        exit(-1);
+    }
+}
 
 
 #endif /* __TEST_LOCK_REG_H__ */
