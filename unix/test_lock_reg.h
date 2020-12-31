@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2020-12-28 20:36:08
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2020-12-30 18:58:43
+//  ModifyDate:   2020-12-31 08:58:40
 // =======================================================================
 
 #ifndef __TEST_LOCK_REG_H__
@@ -14,6 +14,9 @@
 #include <stdio.h>
 #include <signal.h>
 #include <stdlib.h>
+
+
+#define FILE_MODE  (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 
 static volatile sig_atomic_t sigflag;
 static sigset_t newmask, oldmask, zeromask;
