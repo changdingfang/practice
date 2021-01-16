@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-16 10:33:27
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-01-16 10:45:19
+//  ModifyDate:   2021-01-16 15:40:12
 // =======================================================================
 
 #include <stdio.h>
@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/un.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 
 int main(void)
@@ -31,8 +32,14 @@ int main(void)
 
     size = offsetof(struct sockaddr_un, sun_path) + strlen(un.sun_path);
 
-    if (access(unix_path, F_OK) == 0)
+    struct stat statbuf;
+    if (stat(unix_path, &statbuf) == 0)
     {
+        if (S_ISSOCK(statbuf.st_mode) == 0)
+        {
+            printf("file alread exists and not sock type, unxi path: %s\n", unix_path);
+            exit(-1);
+        }
         remove(unix_path);
     }
 
