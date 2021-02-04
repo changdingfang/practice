@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-27 19:05:03
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-01-27 22:10:04
+//  ModifyDate:   2021-02-04 19:53:16
 // =======================================================================
 
 #include "unp.h"
@@ -96,6 +96,46 @@ static void err_doit(int errnoflag, int level, const char *fmt, va_list ap)
 }
 
 
+char *sock_ntop(const struct sockaddr *sa, socklen_t salen)
+{
+    char portstr[8];
+    static char str[128];
+
+    switch (sa->sa_family)
+    {
+        case AF_INET: 
+            {
+                struct sockaddr_in *sin = (struct sockaddr_in *) sa;
+                if (inet_ntop(AF_INET, &sin->sin_addr, str, sizeof(str)) == NULL)
+                {
+                    return NULL;
+                }
+                if (ntohs(sin->sin_port) != 0)
+                {
+                    snprintf(portstr, sizeof(portstr), ":%d", ntohs(sin->sin_port));
+                    strcat(str, portstr);
+                }
+                return str;
+            }
+        case AF_INET6:
+            {
+                struct sockaddr_in6  *sin = (struct sockaddr_in6*)sa;
+                if (inet_ntop(AF_INET, &sin->sin6_addr, str, sizeof(str)) == NULL)
+                {
+                    return NULL;
+                }
+                if (ntohs(sin->sin6_port) != 0)
+                {
+                    snprintf(portstr, sizeof(portstr), ":%d", ntohs(sin->sin6_port));
+                    strcat(str, portstr);
+                }
+                return str;
+            }
+        default: return NULL;
+    }
+}
+
+
 int Socket(int family, int type, int protocol)
 {
     int n;
@@ -153,3 +193,87 @@ void Pthread_mutex_lock(pthread_mutex_t *mptr)
 }
 
 
+ssize_t readn(int fd, char *ptr, size_t size)
+{
+    ssize_t aread   = 0;
+    ssize_t nread   = 0;
+
+    while (aread < size)
+    {
+        if ((nread = read(fd, ptr + aread, size - aread)) < 0)
+        {
+            if (nread == EINTR)
+            {
+                continue;
+            }
+            return -1;
+        }
+        else if (nread == 0)
+        {
+            break;
+        }
+        aread += nread;
+    }
+
+    return aread;
+}
+
+
+ssize_t writen(int fd, const char *ptr, size_t size)
+{
+    ssize_t awrite = 0;
+    ssize_t nwrite = 0;
+
+    while (awrite < size)
+    {
+        if ((nwrite = write(fd, ptr + awrite, size - awrite)) <= 0)
+        {
+            if (nwrite < 0 && nwrite == EINTR)
+            {
+                continue;
+            }
+
+            return -1;
+        }
+
+        awrite += nwrite;
+    }
+
+    return awrite;
+}
+
+
+ssize_t readline(int fd, char *ptr, size_t size)
+{
+    ssize_t aread = 1;
+    ssize_t nread = 0;
+
+
+    while (aread < size)
+    {
+        if ((nread = read(fd, ptr + aread, 1)) == 1)
+        {
+            aread += nread;
+            if (*(ptr + aread) == '\n')
+            {
+                break;
+            }
+        }
+        else if (nread == 0)
+        {
+            break;
+        }
+        else
+        {
+            if (nread == EINTR)
+            {
+                continue;
+            }
+            return -1;
+        }
+    }
+
+    *(ptr + aread) = '\0';
+
+    return aread;
+}

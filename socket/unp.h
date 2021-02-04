@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-27 08:42:50
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-01-27 22:11:06
+//  ModifyDate:   2021-02-04 19:41:41
 // =======================================================================
 
 #ifndef __UNP_H__
@@ -59,6 +59,9 @@ void err_msg(const char *fmt, ...);
 void err_quit(const char *fmt, ...);
 
 
+char *sock_ntop(const struct sockaddr *sa, socklen_t salen);
+
+
 int Socket(int family, int type, int protocol);
 int Bind(int fd, struct sockaddr *addr, socklen_t addrlen);
 int Listen(int fd, int backlog);
@@ -67,6 +70,10 @@ int Write(int fd, const char *buf, int buflen);
 int Close(int fd);
 
 void Pthread_mutex_lock(pthread_mutex_t *mptr);
+
+ssize_t readn(int , char *, size_t );
+ssize_t writen(int , const char *, size_t );
+ssize_t readline(int , char *, size_t );
 
 
 #endif /* __UNP_H__ */
