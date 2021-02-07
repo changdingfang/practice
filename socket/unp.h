@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-27 08:42:50
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-02-04 19:41:41
+//  ModifyDate:   2021-02-07 20:13:27
 // =======================================================================
 
 #ifndef __UNP_H__
@@ -74,6 +74,9 @@ void Pthread_mutex_lock(pthread_mutex_t *mptr);
 ssize_t readn(int , char *, size_t );
 ssize_t writen(int , const char *, size_t );
 ssize_t readline(int , char *, size_t );
+
+
+void str_cli(FILE *fp, int sockfd);
 
 
 #endif /* __UNP_H__ */

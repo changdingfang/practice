@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-27 19:05:03
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-02-04 19:53:16
+//  ModifyDate:   2021-02-07 21:04:17
 // =======================================================================
 
 #include "unp.h"
@@ -276,4 +276,44 @@ ssize_t readline(int fd, char *ptr, size_t size)
     *(ptr + aread) = '\0';
 
     return aread;
+}
+
+
+void str_cli(FILE *fp, int sockfd)
+{
+    int maxfdpl;
+    fd_set rset;
+    char buf[MAXLINE];
+    ssize_t len = 0;
+
+    FD_ZERO(&rset);
+
+    while (1)
+    {
+        FD_SET(fileno(fp), &rset);
+        FD_SET(sockfd, &rset);
+
+        maxfdpl = max(fileno(fp), sockfd) + 1;
+
+        int n = select(maxfdpl, &rset, NULL, NULL, NULL);
+
+        if (FD_ISSET(sockfd, &rset))
+        {
+            if ((len = readn(sockfd, buf, MAXLINE)) == 0)
+            {
+                err_quit("str cli: server terminated prematurely");
+            }
+            writen(sockfd, buf, len);
+        }
+
+        if (FD_ISSET(fileno(fp), &rset))
+        {
+            if (readn(fileno(fp), buf, MAXLINE) == 0)
+            {
+                return ;
+            }
+
+            writen(sockfd, buf, strlen(buf));
+        }
+    }
 }
