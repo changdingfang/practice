@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-27 08:42:50
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-02-07 20:13:27
+//  ModifyDate:   2021-02-22 21:04:52
 // =======================================================================
 
 #ifndef __UNP_H__
@@ -33,6 +33,7 @@
 #include <event.h>
 #include <sys/ioctl.h>
 #include <pthread.h>
+#include <netinet/tcp.h>
 
 
 #define LISTENQ     1024
@@ -68,6 +69,9 @@ int Listen(int fd, int backlog);
 int Accept(int fd, struct sockaddr *addr, socklen_t* addrlen);
 int Write(int fd, const char *buf, int buflen);
 int Close(int fd);
+
+int Getsockopt(int fd, int level, int optname, void *optval, socklen_t *optlen);
+
 
 void Pthread_mutex_lock(pthread_mutex_t *mptr);
 

@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-27 19:05:03
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-02-07 21:04:17
+//  ModifyDate:   2021-02-22 21:00:25
 // =======================================================================
 
 #include "unp.h"
@@ -176,6 +176,17 @@ int Write(int fd, const char *buf, int buflen)
 int Close(int fd)
 {
     return close(fd);
+}
+
+
+int Getsockopt(int fd, int level, int optname, void *optval, socklen_t *optlen)
+{
+    if (getsockopt(fd, level, optname, optval, optlen) < 0)
+    {
+        err_quit("getsockopt error!");
+    }
+
+    return 0;
 }
 
 
