@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 14:49:19
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-20 14:00:32
+//  ModifyDate:   2021-03-08 19:21:07
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  
 #include "String.h"
@@ -313,6 +313,29 @@ void testAppend()
     assert(!strcmp(s1.c_str(), "hello ding fangmmmmmmmmmm"));
 
     cout << "append test success" << endl;
+}
+
+
+void testOperatorAdd()
+{
+    String s1("hello world"), s2("ding fang");
+
+    check(s1, 11, 15);
+    s1 = s1 + s2;
+
+    check(s1, 20, 30);
+    assert(!strcmp(s1.c_str(), "hello worldding fang"));
+
+    s1 = s1 + "abcd";
+    assert(!strcmp(s1.c_str(), "hello worldding fangabcd"));
+
+    s1 = s1 + 'x';
+    assert(!strcmp(s1.c_str(), "hello worldding fangabcdx"));
+
+    s1.clear();
+    assert(!strcmp(s1.c_str(), ""));
+
+    cout << "operator add test success" << endl;
 }
 
 
@@ -830,6 +853,7 @@ int main(void)
     testReserve();
     testClear();
     testAppend();
+    testOperatorAdd();
     testCompare();
     testErase();
     testSwap();

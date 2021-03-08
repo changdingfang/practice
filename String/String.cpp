@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:40:15
 // ModifyAuthor: dingfang
-// ModifyDate:   2020-09-20 13:49:06
+//  ModifyDate:   2021-03-08 19:17:01
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #include "String.h"
@@ -372,13 +372,13 @@ namespace df
 
     String operator + (const String &l, const String &r)
     {
-        return std::move(String(l.data()).append(r.data(), r.size()));
+        return String(l.data()) + r.data();
     }
 
 
     String operator + (const char *data, const String &r)
     {
-        return std::move(String(r.data()).append(data, ::strlen(data)));
+        return String(r.data()) + data;
     }
 
 
@@ -396,7 +396,7 @@ namespace df
 
     String operator + (char ch, const String &r)
     {
-        return std::move(String(r.data()).append(1, ch));
+        return String(r.data()) + ch;
     }
 
 

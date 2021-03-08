@@ -1,9 +1,9 @@
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// FileName:     String.h
-// Author:       dingfang
-// CreateDate:   2020-09-02 19:35:54
-// ModifyAuthor: dingfang
-// ModifyDate:   2020-09-20 13:56:54
+//  FileName:     String.h
+//  Author:       dingfang
+//  CreateDate:   2020-09-02 19:35:54
+//  ModifyAuthor: dingfang
+//  ModifyDate:   2021-03-08 19:11:45
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #ifndef __STRING_H__
@@ -102,7 +102,6 @@ namespace df
         // TODO
         /* * * * * * * * * * * * */
         /* 查找 */
-        /* 采用的比较暴力,可优化成KMP算法 */
         sizeType find(const String &r, sizeType pos = 0) const;
         sizeType find(const char *data, sizeType pos = 0) const;
         sizeType find(const char *data, sizeType pos, sizeType count) const;
@@ -135,7 +134,7 @@ namespace df
         /* 查找 */
         /* 
          * 采用的比较暴力,且把后项查找和前项查找基层到一起,效率更低, 
-         * 可优化成KMP算法,后项查找可分离出来反向查 
+         * 可优化算法,后项查找可分离出来反向查 
          * */
         sizeType find_(const char *data, sizeType pos, sizeType count, sizeType num) const;
 
