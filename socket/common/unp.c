@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-27 19:05:03
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-02-22 21:00:25
+//  ModifyDate:   2021-03-15 21:19:16
 // =======================================================================
 
 #include "unp.h"
@@ -327,4 +327,116 @@ void str_cli(FILE *fp, int sockfd)
             writen(sockfd, buf, strlen(buf));
         }
     }
+}
+
+struct addrinfo * hostServ(const char *host, const char *serv, int family, int socktype)
+{
+    int n;
+    struct addrinfo hints, *res;
+
+    memset(&hints, 0x00, sizeof(struct addrinfo));
+    hints.ai_flags    = AI_CANONNAME;
+    hints.ai_family   = family;
+    hints.ai_socktype = socktype;
+
+    if ((n = getaddrinfo(host, serv, &hints, &res)) != 0)
+    {
+        return NULL;
+    }
+
+    return res;
+}
+
+int tcpConnect(const char *host, const char *serv)
+{
+    int sockfd, n;
+    struct addrinfo hints, *res = NULL, *ressave = NULL;
+
+    memset(&hints, 0x00, sizeof(struct addrinfo));
+    hints.ai_family   = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if ((n = getaddrinfo(host, serv, &hints, &res)) != 0)
+    {
+        err_quit("tcp connect error for %s, %s: %s", host, serv, gai_strerror(n));
+    }
+
+    ressave = res;
+
+    while (res)
+    {
+        sockfd = Socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+        if (socket < 0)
+        {
+            continue;
+        }
+
+        if (connect(sockfd, res->ai_addr, res->ai_addrlen) == 0)
+        {
+            break;
+        }
+        Close(sockfd);
+        res = res->ai_next;
+    }
+
+    if (res == NULL)
+    {
+        err_sys("tcp connect error for %s, %s", host, serv);
+    }
+
+    freeaddrinfo(ressave);
+
+    return sockfd;
+}
+
+int tcpListen(const char *host, const char *serv, socklen_t *addrlenp)
+{
+    int listenfd, n;
+    const int on = 1;
+    struct addrinfo hints, *res, *ressave;
+
+    memset(&hints, 0x00, sizeof(struct addrinfo));
+    hints.ai_flags    = AI_PASSIVE;
+    hints.ai_family   = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if ((n = getaddrinfo(host, serv, &hints, &res)) != 0)
+    {
+        err_quit("tcp connect error for %s, %s: %s", host, serv, gai_strerror(n));
+    }
+
+    ressave = res;
+
+    while (res)
+    {
+        listenfd = Socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+        if (listenfd < 0)
+        {
+            continue;
+        }
+
+        setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+        if (bind(listenfd, res->ai_addr, res->ai_addrlen) == 0)
+        {
+            break;
+        }
+        Close(listenfd);
+        res = res->ai_next;
+    }
+
+    if (res == NULL)
+    {
+        err_sys("tcp connect error for %s, %s", host, serv);
+    }
+
+    Listen(listenfd, LISTENQ);
+
+    if (addrlenp)
+    {
+        *addrlenp = res->ai_addrlen;
+    }
+
+    freeaddrinfo(ressave);
+
+    return listenfd;
 }

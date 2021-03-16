@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-27 08:42:50
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-02-22 21:04:52
+//  ModifyDate:   2021-03-15 21:14:50
 // =======================================================================
 
 #ifndef __UNP_H__
@@ -82,6 +82,9 @@ ssize_t readline(int , char *, size_t );
 
 void str_cli(FILE *fp, int sockfd);
 
+struct addrinfo * hostServ(const char *host, const char *serv, int family, int socktype);
+int tcpConnect(const char *host, const char *serv);
+int tcpListen(const char *host, const char *serv, socklen_t *addrlenp);
 
 #endif /* __UNP_H__ */
 
