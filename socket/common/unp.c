@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-27 19:05:03
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-03-15 21:19:16
+//  ModifyDate:   2021-04-09 08:00:59
 // =======================================================================
 
 #include "unp.h"
@@ -439,4 +439,24 @@ int tcpListen(const char *host, const char *serv, socklen_t *addrlenp)
     freeaddrinfo(ressave);
 
     return listenfd;
+}
+
+char *gfTime(void)
+{
+    struct timeval tv;
+    static char str[30];
+    char *ptr;
+
+    if (gettimeofday(&tv, NULL) < 0)
+    {
+        err_sys("gettiemofday error");
+    }
+
+    ptr = ctime(&tv.tv_sec);
+    /* xxx xxx xx 00:00:00 2021\n\0*/
+    strcpy(str, &ptr[11]);
+
+    snprintf(str + 8, sizeof(str) - 8, ".%06ld", tv.tv_usec);
+
+    return str;
 }
