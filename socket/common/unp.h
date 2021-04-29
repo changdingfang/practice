@@ -3,7 +3,7 @@
 //  Author:       dingfang
 //  CreateDate:   2021-01-27 08:42:50
 //  ModifyAuthor: dingfang
-//  ModifyDate:   2021-04-11 10:48:20
+//  ModifyDate:   2021-04-29 20:22:49
 // =======================================================================
 
 #ifndef __UNP_H__
@@ -88,6 +88,8 @@ int tcpConnect(const char *host, const char *serv);
 int tcpListen(const char *host, const char *serv, socklen_t *addrlenp);
 
 char *gfTime(void);
+
+char *sock_ntop_host(const struct sockaddr *sa, socklen_t salen);
 
 
 #define IFI_NAME    16
