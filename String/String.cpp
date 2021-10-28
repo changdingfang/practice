@@ -3,7 +3,7 @@
 // Author:       dingfang
 // CreateDate:   2020-09-02 19:40:15
 // ModifyAuthor: dingfang
-//  ModifyDate:   2021-03-08 19:17:01
+//  ModifyDate:   2021-10-28 22:51:41
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #include "String.h"
@@ -384,13 +384,13 @@ namespace df
 
     String operator + (const String &l, const char *data)
     {
-        return std::move(String(l.data()).append(data, ::strlen(data)));
+        return String(l.data()).append(data, ::strlen(data));
     }
 
 
     String operator + (const String &l, char ch)
     {
-        return std::move(String(l.data()).append(1, ch));
+        return String(l.data()).append(1, ch);
     }
 
 
@@ -724,7 +724,7 @@ namespace df
 
     String String::substr(sizeType pos, sizeType count) const
     {
-        return std::move(String("").append(*this, pos, count));
+        return String("").append(*this, pos, count);
     }
 
 
